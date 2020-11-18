@@ -8,7 +8,7 @@
   <title>Document</title>
 
   <script defer src="face-api.min.js"></script>
-  <script defer src="script.js"></script>
+  <!-- <script defer src="script.js"></script> -->
 
   <style type="text/css">
     #canvas, #inputVideo {
@@ -16,21 +16,123 @@
       top: 0;
       left: 0;
     }
-    #imageUpload {
+    #imageUpload, #avatar,  {
       position: absolute;
       top: 700px;
-      left: 0;
+    }
+
+    device  {
+      position: absolute;
+      top: 700px; left: 300px;
     }
   </style>
 </head>
 <body>
-  <div style="position: relative" class="margin">
+  <div id="webcamBox" style="position: relative" class="margin">
 
-   <!--  <video id="inputVideo" width="720" height="560"  autoplay muted ></video>
-    <canvas id="canvas" width="720" height="560" />
- -->
-    <input type="file" id="imageUpload">
+
+    <video id="inputVideo" width="720" height="560"  autoplay muted ></video>
+    <canvas id="canvas" width="720" height="560" ></canvas>
+
+
   </div>
 
+  <div style="position: absolute; top: 720px">
+
+    <p><button class="capture-button" onclick="capture()">Capture video</button>
+    <p><button id="cssfilters-apply" onclick="playVideo()">Play</button></p>
+
+  </div>
+<script>
+  const video = document.getElementById('inputVideo');
+  const canvas = document.getElementById('canvas');
+
+  // const avatar = document.getElementById('avatar')
+  const imageUpload = document.getElementById('imageUpload')
+  const wrapperBox = document.getElementById('webcamBox')
+
+  function capture(){
+    let img = document.querySelector('#screenshot');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    // Other browsers will fall back to image/png
+    // img.src = canvas.toDataURL('image/webp');
+    // alert("Asds")
+  }
+
+  function playVideo(){
+
+      Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+        faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+        faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+        faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
+        // faceapi.nets.faceExpressionNet.loadFromUri('/models')
+      ]).then(startVideo)
+      // ]).then(start)
+
+
+        video.addEventListener('play', () => {
+          // const canvas = faceapi.createCanvasFromMedia(video)
+          // wrapperBox.append(canvas)
+          const displaySize = { width: video.width, height: video.height }
+          faceapi.matchDimensions(canvas, displaySize)
+          console.log("asdas")
+          setInterval(async () => {
+            // let image = await faceapi.fetchImage(avatar.src)
+            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+            .withFaceLandmarks().withFaceDescriptors()
+            // .withFaceExpressions()
+            const resizedDetections = faceapi.resizeResults(detections, displaySize)
+
+
+            const labeledFaceDescriptors = await loadLabeledImages()
+            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6)
+
+            const results = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor))
+            results.forEach((result, i) => {
+              canvas.getContext('2d').clearRect(0, 0, video.width, video.height)
+              const box = resizedDetections[i].detection.box
+              if (result._distance <= 5) {
+                console.log("success")
+              }
+              const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() })
+              drawBox.draw(canvas)
+            })
+
+          }, 50)
+        })
+
+    }
+
+  function startVideo() {
+    navigator.getUserMedia(
+      { video: {} },
+      stream => video.srcObject = stream,
+      err => console.error(err)
+    )
+  }
+
+  function loadLabeledImages() {
+    const labels = ['Thang']
+    return Promise.all(
+      labels.map(async label => {
+        const descriptions = []
+        for (let i = 1; i <= 2; i++) {
+
+          const avatar = await faceapi.fetchImage(`images/thang1.jpg`)
+          const detections = await faceapi.detectSingleFace(avatar)
+              .withFaceLandmarks()
+              .withFaceDescriptor()
+          descriptions.push(detections.descriptor)
+          console.log(descriptions)
+        }
+
+        return new faceapi.LabeledFaceDescriptors(label, descriptions)
+      })
+    )
+  }
+</script>
 </body>
 </html>
