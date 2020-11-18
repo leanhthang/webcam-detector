@@ -21,7 +21,7 @@ function videoOnPlay() {
   if (!inputCMNDFront.files[0]) {
     alert('Chưa có CMND/CCCD mặt trước');
   }
-  loadFaceapi()
+  loadFaceapi();
   video.play();
   video.onplay = function() {
       const displaySize = { width: video.width, height: video.height }
@@ -62,7 +62,6 @@ function loadFaceapi() {
     faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
   ]).then(startVideo);
 }
-
 function startVideo() {
   navigator.getUserMedia(
     { video: {} },
