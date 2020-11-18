@@ -6,127 +6,93 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
 
+  <script defer src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script defer src="face-api.min.js"></script>
   <script defer src="script.js"></script>
+  <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
 
   <style type="text/css">
     * {
       margin: 0;
       padding: 0;
     }
-    #canvas, #inputVideo {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
 
-    device  {
-      position: absolute;
-      top: 700px; left: 300px;
+    #inputVideo, #canvas {
+      /*position: absolute;
+      top: 0;
+      left: 0;*/
     }
-    .d-none {
-      display: none;
+    .img-thumbnail {
+      height: 150px;
+      object-fit: contain;
     }
   </style>
 </head>
 <body>
-  <div></div>
-  <div id="webcamBox" style="position: relative" class="margin">
-    <video id="inputVideo" width="480" height="320" autoplay></video>
-    <canvas id="canvas" width="480" height="320" ></canvas>
+  <div class="container">
+    <ul class="nav mb-4">
+      <li class="nav-item">
+        <a class="nav-link active" href="#">< Quay lại sales portal</a>
+      </li>
+    </ul>
 
-    <div class="alert d-none"></div>
+    <div class="d-flex justify-content-center">
+      <div class="card w-100" style="w-100">
+        <div class="card-header">
+          <b>eKYC</b> <span id="ekyc-label-is-confirm" class="text-danger">(Chưa xác thực)</span>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-6 text-center">
+                <div class="input-group">
+                  <div class="custom-file">
+                    <input id="CMNDFront" type="file" class="custom-file-input" onchange="uploadCMND(event, 'previewCMNDFront')">
+                    <label class="custom-file-label" for="inputGroupFile04">Mặt trước CMND/ CCCD</label>
+                  </div>
+                </div>
+                <img class="img-thumbnail d-none mt-3" id="previewCMNDFront" width="150px" height="150px"/>
+              </div>
+              <div class="col-6 text-center">
+                <div class="input-group">
+                  <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="CMNDBack" onchange="uploadCMND(event, 'previewCMNDBack')">
+                    <label class="custom-file-label" for="inputGroupFile04">Mặt sau CMND/ CCCD</label>
+                  </div>
+                </div>
+                <img class="img-thumbnail d-none mt-3" id="previewCMNDBack" width="150px" height="150px"/>
+              </div>
+            </div>
+          </li>
+
+          <li class="list-group-item text-center ">
+            <div id="btnDetectWebcam" class="btn btn-outline-primary mb-3" onclick="videoOnPlay()">
+              Xác thực hình ảnh
+            </div>
+            <div id="webcamBox" style="position: relative" class="border-primary d-flex justify-content-center">
+              <div class="" style="position: relative; width: 480px; height: 320px">
+                <video id="inputVideo" width="480" height="320" src="images/mov_bbb.mp4" class="border border-primary"></video>
+                <canvas id="canvas" width="480" height="320" class=""></canvas>
+
+              </div>
+              <div class="alert d-none"></div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
-<!-- <script>
-  const video = document.getElementById('inputVideo');
-  const canvas = document.getElementById('canvas');
-
-  // const avatar = document.getElementById('avatar')
-  const imageUpload = document.getElementById('imageUpload')
-  const wrapperBox = document.getElementById('webcamBox')
-
-  function capture(){
-    let img = document.querySelector('#screenshot');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    // Other browsers will fall back to image/png
-    // img.src = canvas.toDataURL('image/webp');
-    // alert("Asds")
-  }
-
-  function playVideo(){
-
-      Promise.all([
-        faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-        faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-        faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-        faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
-        // faceapi.nets.faceExpressionNet.loadFromUri('/models')
-      ]).then(startVideo)
-      // ]).then(start)
-
-
-        video.addEventListener('play', () => {
-          // const canvas = faceapi.createCanvasFromMedia(video)
-          // wrapperBox.append(canvas)
-          const displaySize = { width: video.width, height: video.height }
-          faceapi.matchDimensions(canvas, displaySize)
-          console.log("asdas")
-          setInterval(async () => {
-            // let image = await faceapi.fetchImage(avatar.src)
-            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-            .withFaceLandmarks().withFaceDescriptors()
-            // .withFaceExpressions()
-            const resizedDetections = faceapi.resizeResults(detections, displaySize)
-
-
-            const labeledFaceDescriptors = await loadLabeledImages()
-            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6)
-
-            const results = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor))
-            results.forEach((result, i) => {
-              canvas.getContext('2d').clearRect(0, 0, video.width, video.height)
-              const box = resizedDetections[i].detection.box
-              if (result._distance <= 5) {
-                console.log("success")
-              }
-              const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() })
-              drawBox.draw(canvas)
-            })
-
-          }, 50)
-        })
-
-    }
-
-  function startVideo() {
-    navigator.getUserMedia(
-      { video: {} },
-      stream => video.srcObject = stream,
-      err => console.error(err)
-    )
-  }
-
-  function loadLabeledImages() {
-    const labels = ['Thang']
-    return Promise.all(
-      labels.map(async label => {
-        const descriptions = []
-        for (let i = 1; i <= 2; i++) {
-
-          const avatar = await faceapi.fetchImage(`images/thang1.jpg`)
-          const detections = await faceapi.detectSingleFace(avatar)
-              .withFaceLandmarks()
-              .withFaceDescriptor()
-          descriptions.push(detections.descriptor)
-          console.log(descriptions)
-        }
-
-        return new faceapi.LabeledFaceDescriptors(label, descriptions)
-      })
-    )
-  }
-</script> -->
 </body>
 </html>
+
+<script type="text/javascript">
+  function uploadCMND(event, prev_img_id) {
+    $(`#${prev_img_id}`).removeClass('d-none');
+    var reader = new FileReader();
+    reader.onload = function(){
+      var output = document.getElementById(prev_img_id);
+      output.src = reader.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  }
+</script>
