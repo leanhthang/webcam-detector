@@ -18,13 +18,19 @@
     }
 
     #inputVideo, #canvas {
-      /*position: absolute;
+      position: absolute;
       top: 0;
-      left: 0;*/
+      left: 0;
     }
     .img-thumbnail {
       height: 150px;
       object-fit: contain;
+    }
+
+    #ekyc-alert-success {
+      width: 50%;
+      position: absolute;
+      bottom: 10%;
     }
   </style>
 </head>
@@ -67,15 +73,21 @@
 
           <li class="list-group-item text-center ">
             <div id="btnDetectWebcam" class="btn btn-outline-primary mb-3" onclick="videoOnPlay()">
-              Xác thực hình ảnh
+              Xác thực camera
             </div>
             <div id="webcamBox" style="position: relative" class="border-primary d-flex justify-content-center">
               <div class="" style="position: relative; width: 480px; height: 320px">
-                <video id="inputVideo" width="480" height="320" src="images/mov_bbb.mp4" class="border border-primary"></video>
+                <video id="inputVideo" width="480" height="320" class="border border-primary"></video>
                 <canvas id="canvas" width="480" height="320" class=""></canvas>
 
               </div>
-              <div class="alert d-none"></div>
+
+              <div id="ekyc-alert-success" class="alert border border-success text-success d-none bg-light" role="alert">
+                Submitted Successfully
+                <div class="w-100">
+                  <div class="btn btn-success mt-2">Hoàn thành  <b id="ekyc-like-percent" class="text-danger"></b></div>
+                </div>
+              </div>
             </div>
           </li>
         </ul>
@@ -84,15 +96,3 @@
   </div>
 </body>
 </html>
-
-<script type="text/javascript">
-  function uploadCMND(event, prev_img_id) {
-    $(`#${prev_img_id}`).removeClass('d-none');
-    var reader = new FileReader();
-    reader.onload = function(){
-      var output = document.getElementById(prev_img_id);
-      output.src = reader.result;
-    };
-    reader.readAsDataURL(event.target.files[0]);
-  }
-</script>

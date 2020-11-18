@@ -2,9 +2,27 @@ const video = document.getElementById('inputVideo');
 const canvas = document.getElementById('canvas');
 const inputCMNDFront = document.getElementById('CMNDFront');
 
+function uploadCMND(event, prev_img_id) {
+  $(`#${prev_img_id}`).removeClass('d-none');
+  var reader = new FileReader();
+  reader.onload = function(){
+    var output = document.getElementById(prev_img_id);
+    output.src = reader.result;
+  };
+  reader.readAsDataURL(event.target.files[0]);
+
+  // video.pause();
+  // video.currentTime = 0;
+
+  resetDector();
+}
+
 function videoOnPlay() {
+  if (!inputCMNDFront.files[0]) {
+    alert('Chưa có CMND/CCCD mặt trước');
+  }
   loadFaceapi()
-  // video.play();
+  video.play();
   video.onplay = function() {
       const displaySize = { width: video.width, height: video.height }
       faceapi.matchDimensions(canvas, displaySize)
@@ -24,8 +42,10 @@ function videoOnPlay() {
         results.forEach((result, i) => {
           canvas.getContext('2d').clearRect(0, 0, video.width, video.height)
           const box = resizedDetections[i].detection.box
-          if (result._distance <= 5) {
-            $('#ekyc-label-is-confirm').removeClass('text-danger').addClass('text-success');
+          if (result._distance <= 0.5) {
+            successDetector(result._distance);
+          } else {
+            $('#ekyc-alert-success').addClass('d-none');
           }
           const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() })
           drawBox.draw(canvas)
@@ -64,10 +84,22 @@ function loadLabeledImages() {
             .withFaceLandmarks()
             .withFaceDescriptor()
         descriptions.push(detections.descriptor)
-        console.log(descriptions)
       }
 
       return new faceapi.LabeledFaceDescriptors(label, descriptions)
     })
   )
+}
+
+function resetDector(){
+  $('#ekyc-label-is-confirm').removeClass('text-success').addClass('text-danger').html('(Chưa xác thực)');
+  $('#ekyc-alert-success').addClass('d-none');
+  // canvas.getContext('2d').clearRect(0, 0, video.width, video.height)
+}
+
+function successDetector(distance) {
+  $('#ekyc-label-is-confirm').removeClass('text-danger').addClass('text-success').html('(Đã xác thực)');
+  $('#ekyc-alert-success').removeClass('d-none');
+  percent = Math.round((1-distance)*100);
+  $('#ekyc-like-percent').html(`~${percent}%`);
 }
