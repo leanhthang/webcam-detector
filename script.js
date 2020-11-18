@@ -1,4 +1,5 @@
-// const video = document.getElementById('inputVideo');
+const video = document.getElementById('inputVideo');
+const canvas = document.getElementById('canvas');
 
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
