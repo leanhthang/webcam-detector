@@ -79,7 +79,6 @@ function loadLabeledImages() {
       const descriptions = []
       for (let i = 1; i <= 2; i++) {
 
-        // const avatar = await faceapi.fetchImage(`images/thang1.jpg`)
         const cmnd = await faceapi.bufferToImage(inputCMNDFront.files[0]);
         const detections = await faceapi.detectSingleFace(cmnd)
             .withFaceLandmarks()
@@ -106,16 +105,16 @@ function successDetector(distance) {
 }
 
 
-const sp_url = 'http://localhost:3001';
-// const api_url = 'http://122.248.226.101:3000';
-const api_url = 'http://localhost:3000';
+const sp_url = 'http://122.248.226.101:3001';
+const api_url = 'http://122.248.226.101:3000';
+// const api_url = 'http://localhost:3000';
 const sp_lead_id = window.location.href.split('leads/informations/')[1];
 $('#link-back-to-sale-portal').on('click', function(event) {
   event.preventDefault();
-  // mbal_pathname = window.location.href.split('https://mbal_sales_portal.ngrok.io/?mbal=')[1];
-  // mbal_link = `http://122.248.226.101:3001${mbal_pathname}`;
-  mbal_pathname = window.location.href.split('?mbal=')[1];
-  mbal_link = `${sp_url}${mbal_pathname}`;
+  mbal_pathname = window.location.href.split('https://mbal_sales_portal.ngrok.io/?mbal=')[1];
+  mbal_link = `http://122.248.226.101:3001${mbal_pathname}`;
+  // mbal_pathname = window.location.href.split('?mbal=')[1];
+  // mbal_link = `${sp_url}${mbal_pathname}`;
   window.location.href = mbal_link;
 });
 
