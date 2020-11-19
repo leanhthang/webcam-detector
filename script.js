@@ -1,6 +1,7 @@
 const video = document.getElementById('inputVideo');
 const canvas = document.getElementById('canvas');
 const inputCMNDFront = document.getElementById('CMNDFront');
+const inputCMNDBack = document.getElementById('CMNDBack');
 
 function uploadCMND(event, prev_img_id) {
   $(`#${prev_img_id}`).removeClass('d-none');
@@ -10,19 +11,17 @@ function uploadCMND(event, prev_img_id) {
     output.src = reader.result;
   };
   reader.readAsDataURL(event.target.files[0]);
-
-  // video.pause();
-  // video.currentTime = 0;
-
   resetDector();
 }
 
 function videoOnPlay() {
-  if (!inputCMNDFront.files[0]) {
-    alert('Chưa có CMND/CCCD mặt trước');
+  if (!inputCMNDFront.files[0] || !inputCMNDBack.files[0]) {
+    alert('Chưa có CMND/CCCD mặt trước/ Mặt sau');
+    return false;
   }
   loadFaceapi();
   video.play();
+  loading(true);
   video.onplay = function() {
       const displaySize = { width: video.width, height: video.height }
       faceapi.matchDimensions(canvas, displaySize)
@@ -36,21 +35,23 @@ function videoOnPlay() {
 
 
         const labeledFaceDescriptors = await loadLabeledImages()
-        const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6)
+        const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.55)
 
         const results = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor))
         results.forEach((result, i) => {
           canvas.getContext('2d').clearRect(0, 0, video.width, video.height)
           const box = resizedDetections[i].detection.box
-          if (result._distance <= 0.5) {
+          if (result._distance <= 0.55) {
             successDetector(result._distance);
           } else {
-            $('#ekyc-alert-success').addClass('d-none');
+            resetDector();
           }
           const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() })
           drawBox.draw(canvas)
-        })
-      }, 50)
+        });
+
+        video.play();
+      }, 100)
   };
 }
 
@@ -71,7 +72,8 @@ function startVideo() {
 }
 
 function loadLabeledImages() {
-  const labels = ['Thang']
+  loading(false);
+  const labels = [$('#kh-name').text()]
   return Promise.all(
     labels.map(async label => {
       const descriptions = []
@@ -102,3 +104,62 @@ function successDetector(distance) {
   percent = Math.round((1-distance)*100);
   $('#ekyc-like-percent').html(`~${percent}%`);
 }
+
+
+const sp_url = 'http://localhost:3001';
+// const api_url = 'http://122.248.226.101:3000';
+const api_url = 'http://localhost:3000';
+const sp_lead_id = window.location.href.split('leads/informations/')[1];
+$('#link-back-to-sale-portal').on('click', function(event) {
+  event.preventDefault();
+  // mbal_pathname = window.location.href.split('https://mbal_sales_portal.ngrok.io/?mbal=')[1];
+  // mbal_link = `http://122.248.226.101:3001${mbal_pathname}`;
+  mbal_pathname = window.location.href.split('?mbal=')[1];
+  mbal_link = `${sp_url}${mbal_pathname}`;
+  window.location.href = mbal_link;
+});
+
+$(function(){
+  $.ajax({
+    url: `${api_url}/api/v1/leads/${sp_lead_id}/ekyc_data`
+  })
+  .done(function(data) {
+    console.log(data);
+    $('#kh-name').html(data.data.basic_info.name)
+  });
+});
+
+function loading(visible) {
+  if (visible == true) {
+    $('.loading').removeClass('d-none');
+  } else {
+    $('.loading').addClass('d-none');
+  }
+}
+
+$('.test-submit').on('click', function(event) {
+  let $form = $('#formCMNDFront');
+  var formData = new FormData($form[0]);
+
+  $.ajax({
+    url: `${api_url}/api/v1/media/force_upload`,
+    type: 'POST',
+    enctype: 'multipart/form-data',
+    data: {
+      kind: 'lead_doc',
+      object_type: 'Lead',
+      object_id: sp_lead_id,
+      file: inputCMNDFront.files[0]
+    },
+  })
+  .done(function(data) {
+    console.log("success");
+  })
+  .fail(function() {
+    console.log("error");
+  })
+  .always(function() {
+    console.log("complete");
+  });
+});
+

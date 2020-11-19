@@ -10,6 +10,7 @@
   <script defer src="face-api.min.js"></script>
   <script defer src="script.js"></script>
   <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
 
   <style type="text/css">
     * {
@@ -38,12 +39,12 @@
   <div class="container">
     <ul class="nav mb-4">
       <li class="nav-item">
-        <a class="nav-link active" href="#">< Quay lại sales portal</a>
+        <a class="nav-link active" id="link-back-to-sale-portal" href="#">< Quay lại sales portal</a>
       </li>
     </ul>
-
+    <h3 class="text-center">Kiểm tra eKYC Khách hàng <i id="kh-name" class="text-danger"></i></h3>
     <div class="d-flex justify-content-center">
-      <div class="card w-100" style="w-100">
+      <div class="card w-100">
         <div class="card-header">
           <b>eKYC</b> <span id="ekyc-label-is-confirm" class="text-danger">(Chưa xác thực)</span>
         </div>
@@ -53,8 +54,10 @@
               <div class="col-6 text-center">
                 <div class="input-group">
                   <div class="custom-file">
-                    <input id="CMNDFront" type="file" class="custom-file-input" onchange="uploadCMND(event, 'previewCMNDFront')">
-                    <label class="custom-file-label" for="inputGroupFile04">Mặt trước CMND/ CCCD</label>
+                    <form id="formCMNDFront" method="post" enctype="multipart/form-data">
+                      <input id="CMNDFront" type="file" class="custom-file-input" onchange="uploadCMND(event, 'previewCMNDFront')">
+                      <label class="custom-file-label" for="CMNDFront">Mặt trước CMND/ CCCD</label>
+                    </form>
                   </div>
                 </div>
                 <img class="img-thumbnail d-none mt-3" id="previewCMNDFront" width="150px" height="150px"/>
@@ -63,7 +66,7 @@
                 <div class="input-group">
                   <div class="custom-file">
                     <input type="file" class="custom-file-input" id="CMNDBack" onchange="uploadCMND(event, 'previewCMNDBack')">
-                    <label class="custom-file-label" for="inputGroupFile04">Mặt sau CMND/ CCCD</label>
+                    <label class="custom-file-label" for="CMNDBack">Mặt sau CMND/ CCCD</label>
                   </div>
                 </div>
                 <img class="img-thumbnail d-none mt-3" id="previewCMNDBack" width="150px" height="150px"/>
@@ -75,6 +78,7 @@
             <div id="btnDetectWebcam" class="btn btn-outline-primary mb-3" onclick="videoOnPlay()">
               Xác thực camera
             </div>
+            <div class="test-submit btn btn-success" >submit</div>
             <div id="webcamBox" style="position: relative" class="border-primary d-flex justify-content-center">
               <div class="" style="position: relative; width: 480px; height: 320px">
                 <video id="inputVideo" width="480" height="320" class="border border-primary"></video>
@@ -83,9 +87,9 @@
               </div>
 
               <div id="ekyc-alert-success" class="alert border border-success text-success d-none bg-light" role="alert">
-                Submitted Successfully
+                Độ phù hợp <b id="ekyc-like-percent" class="text-danger"></b>
                 <div class="w-100">
-                  <div class="btn btn-success mt-2">Hoàn thành  <b id="ekyc-like-percent" class="text-danger"></b></div>
+                  <div id="ekyc-btn-submit" class="btn btn-success mt-2">Submit</div>
                 </div>
               </div>
             </div>
@@ -94,5 +98,7 @@
       </div>
     </div>
   </div>
+
+  <div class="loading d-none">Loading&#8230;</div>
 </body>
 </html>
