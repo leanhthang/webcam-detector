@@ -106,7 +106,7 @@ function successDetector(distance) {
 
 
 const sp_url = 'http://122.248.226.101:3001';
-const api_url = 'http://122.248.226.101:3000';
+const api_url = '//122.248.226.101:3000';
 // const api_url = 'http://localhost:3000';
 const sp_lead_id = window.location.href.split('leads/informations/')[1];
 $('#link-back-to-sale-portal').on('click', function(event) {
